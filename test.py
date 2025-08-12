@@ -1,4 +1,1 @@
-Ayuda
-ajdah
-''
-'kafjbl'
+print("hello world")
