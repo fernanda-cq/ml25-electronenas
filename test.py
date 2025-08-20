@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 mdmdm
 sjjjds
 fjsjsjjs
@@ -13,3 +14,6 @@ bhdfjk
 hehejs
 hole
 
+=======
+print("hello world")
+>>>>>>> 6cffceb579f3fdbefcd088e29c9bfe4aa5bcd429
