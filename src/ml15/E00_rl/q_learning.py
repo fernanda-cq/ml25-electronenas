@@ -38,7 +38,7 @@ class QLearningAgent(RandomAgent):
     def step(self, state, action, reward, next_state):
         best_next_action = np.argmax(self.Q[next_state])
         # TODO: Implementa la actualización de Q-learning usando la ecuación vista en clase
-        self.Q[state][action] = ...
+        
 
 
 if __name__ == "__main__":
@@ -72,7 +72,7 @@ if __name__ == "__main__":
             env.render()
         # TODO: Implementa algun código para reducir la exploración del agente conforme aprende
         # puedes decidir hacerlo por episodio, por paso del tiempo, retorno promedio, etc.
-
+        agent.epsilon = max(0.01, agent.epsilon * 0.995)
 
         print(f"Episode {e} return: ", ep_return)
     env.close()
