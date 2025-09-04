@@ -1,0 +1,19 @@
+e = 0.2         
+descuento = 0.9    
+
+estados = 5
+acciones = 2
+Q = [[0 for _ in range(acciones)] for _ in range(estados)]
+
+estado = 2
+accion = 1
+recompensa = 8
+estado_sig = 3
+
+q_max_sig = max(Q[estado_sig])
+
+Q[estado][accion] = (1 - e) * Q[estado][accion] + e * (recompensa + descuento * q_max_sig)
+
+print("Tabla Q actualizada:")
+for fila in Q:
+    print(fila)
