@@ -10,7 +10,8 @@ class RandomAgent:
         self.num_actions = env.action_space.n
 
         # Tabla estados x acciones
-        self.Q = np.zeros((env.observation_space.n, env.action_space.n))
+        self.Q = np.zeros((env.observation_space.n,
+                           env.action_space.n))
         # Parameters
         self.alpha = alpha  # Learning rate
         self.gamma = gamma  # Discount factor
@@ -37,7 +38,7 @@ class QLearningAgent(RandomAgent):
     def step(self, state, action, reward, next_state):
         best_next_action = np.argmax(self.Q[next_state])
         # TODO: Implementa la actualización de Q-learning usando la ecuación vista en clase
-        
+        self.Q[state][action] = self.Q[state][action]+self.alpha*((reward+self.gamma * np.max(self.Q[next_state])-self.Q[state][action]))
 
 
 if __name__ == "__main__":
@@ -52,7 +53,7 @@ if __name__ == "__main__":
 
     n_episodes = 1000
     episode_length = 200
-    agent = RandomAgent(env, alpha=0.1, gamma=0.9, epsilon=0.9)
+    agent = QLearningAgent(env, alpha=0.1, gamma=0.9, epsilon=0.9)
     for e in range(n_episodes):
         obs, _ = env.reset()
         ep_return = 0
@@ -71,7 +72,10 @@ if __name__ == "__main__":
             env.render()
         # TODO: Implementa algun código para reducir la exploración del agente conforme aprende
         # puedes decidir hacerlo por episodio, por paso del tiempo, retorno promedio, etc.
-        agent.epsilon = max(0.01, agent.epsilon * 0.995)
+        agent.epsilon = max(0.01, agent.epsilon * 0.95)
 
-        print(f"Episode {e} return: ", ep_return)
+        
+        if agent.epsilon > 0.01:
+            agent.epsilon = agent.epsilon - 0.01
+
     env.close()
