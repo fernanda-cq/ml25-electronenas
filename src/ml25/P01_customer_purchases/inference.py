@@ -3,10 +3,7 @@ import joblib
 from pathlib import Path
 import numpy as np
 from datetime import datetime
-from ml25.P01_customer_purchases.boilerplate.data_processing import (
-    read_csv,
-    preprocess_customer_data
-)
+from ml25.P01_customer_purchases.Procesamiento_de_datos import preprocess_customer_data, read_csv
 
 CURRENT_FILE = Path(__file__).resolve()
 RESULTS_DIR = CURRENT_FILE.parent / "test_results"
@@ -17,7 +14,7 @@ DATA_DIR = CURRENT_FILE.parent / "../../datasets/customer_purchases/"
 
 def load_model(model_name: str):
     filepath = MODELS_DIR / model_name
-    print(f"🧠 Cargando modelo desde: {filepath}")
+    print(f"Cargando modelo desde: {filepath}")
     model = joblib.load(filepath)
     return model
 
