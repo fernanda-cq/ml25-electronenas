@@ -41,11 +41,13 @@ class PurchaseModel:
         """
         now = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{prefix}_{now}.pkl"
-        filepath = Path(MODELS_DIR) / filename
+        filepath = Path(MODELS_DIR) / filename #path directorip
         filepath.parent.mkdir(parents=True, exist_ok=True)
         filepath = os.path.abspath(filepath)
 
-        joblib.dump(self, filepath)
+
+#self en lugaf mejor modelo
+        joblib.dump(, filepath)
         print(f"{repr(self)} || Model saved to {filepath}")
         return filepath
 
