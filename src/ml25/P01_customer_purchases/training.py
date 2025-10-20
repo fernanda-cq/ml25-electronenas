@@ -38,7 +38,6 @@ def check_and_prevent_overfitting(model, X_train, X_val, y_train, y_val, X_test=
     # Evaluación de overfitting
     if difference > 0.05:
         print("  POSIBLE OVERFITTING DETECTADO :O")
-
         return True
     elif difference > 0.02:
         print("  Pequeña diferencia, monitorear :/")
@@ -74,17 +73,52 @@ def comprehensive_evaluation(model, X_train, X_val, y_train, y_val):
     print("\n      Classification Report (Validation):")
     print(classification_report(y_val, y_val_pred))
 
-    # Función principal
+# Función principal
 def main():
     print("\n" + "="*60)
     print("INICIANDO ENTRENAMIENTO")
     print("="*60)
+    
+    # Leer datos
     train_df = read_csv("customer_purchases_train_with_ids")
     test_df = read_csv("customer_purchases_test_with_ids")
 
+    # ✅ VERIFICACIÓN CRÍTICA: Revisar qué columnas tenemos
+    print("🔍 COLUMNAS EN TRAIN:")
+    for col in train_df.columns:
+        print(f"   - {col} ({train_df[col].dtype})")
+    
+    # ✅ SOLUCIÓN: ELIMINAR TODAS LAS COLUMNAS QUE PUEDAN CONTENER STRINGS
+    columnas_a_eliminar = [
+        "customer_id", "purchase_id",  # IDs que contienen strings
+        "item_title", "item_img_filename",  # Texto
+        "customer_date_of_birth", "customer_signup_date",  # Fechas
+        "purchase_timestamp", "item_release_date"  # Más fechas
+    ]
+    
+    # Eliminar columnas problemáticas
+    columnas_eliminadas_train = [col for col in columnas_a_eliminar if col in train_df.columns]
+    columnas_eliminadas_test = [col for col in columnas_a_eliminar if col in test_df.columns]
+    
+    print(f"🗑️  Eliminando columnas con strings:")
+    print(f"   - Train: {columnas_eliminadas_train}")
+    print(f"   - Test: {columnas_eliminadas_test}")
+    
     y_train_full = train_df["label"].copy()
-    train_df_features = train_df.drop(columns=["label", "customer_id"], errors="ignore")
-    test_df_features = test_df.drop(columns=["customer_id"], errors="ignore")
+    
+    # Crear features eliminando columnas problemáticas
+    train_df_features = train_df.drop(columns=columnas_eliminadas_train, errors="ignore")
+    test_df_features = test_df.drop(columns=columnas_eliminadas_test, errors="ignore")
+    
+    # ✅ VERIFICACIÓN EXTRA: Solo mantener columnas numéricas
+    train_df_features = train_df_features.select_dtypes(include=[np.number])
+    test_df_features = test_df_features.select_dtypes(include=[np.number])
+    
+    print(f"✅ Features después de limpieza:")
+    print(f"   - Train: {train_df_features.shape}")
+    print(f"   - Test: {test_df_features.shape}")
+    
+    # Encontrar columnas comunes
     common_cols = list(set(train_df_features.columns) & set(test_df_features.columns))
     
     features_stop_words = [
@@ -105,7 +139,19 @@ def main():
     
     X_train_full = train_df_features[common_cols_filtradas]
     X_test = test_df_features[common_cols_filtradas]
-    test_customer_ids = test_df["customer_id"].copy()
+    
+    # ✅ VERIFICACIÓN FINAL: Asegurar que no hay strings
+    print("🔍 VERIFICACIÓN FINAL DE TIPOS DE DATOS:")
+    for col in X_train_full.columns:
+        if X_train_full[col].dtype == 'object':
+            print(f"❌ PROBLEMA: Columna {col} todavía es string")
+            # Eliminar columnas problemáticas
+            X_train_full = X_train_full.drop(columns=[col])
+            X_test = X_test.drop(columns=[col], errors='ignore')
+    
+    print(f"✅ Shape final:")
+    print(f"   - X_train_full: {X_train_full.shape}")
+    print(f"   - X_test: {X_test.shape}")
     
     # Combinar features y labels para el sampling
     train_data = pd.concat([X_train_full, y_train_full], axis=1)
@@ -153,7 +199,6 @@ def main():
         print(f" Usando {len(final_common_cols)} columnas finales")
     else:
         print("Train y test tienen las mismas columnas :D")
-
 
     # Análisis de características disponibles
     print("\n" + "="*60)
@@ -216,6 +261,13 @@ def main():
     print("\n" + "="*60)
     print("USANDO DATOS BALANCEADOS")
     print("="*60)
+    
+    # ✅ VERIFICACIÓN FINAL ANTES DE ENTRENAR
+    print("🔍 VERIFICACIÓN FINAL ANTES DEL ENTRENAMIENTO:")
+    print(f"   - X_train shape: {X_train.shape}")
+    print(f"   - X_train dtypes: {X_train.dtypes.unique()}")
+    print(f"   - ¿Hay strings?: {'object' in X_train.dtypes.astype(str)}")
+    
     search.fit(X_train, y_train)
     
     best_rf = search.best_estimator_
@@ -283,34 +335,42 @@ def main():
 
     # Guardar modelo
     joblib.dump(final_model, MODEL_OUTPUT)
+    print(f"💾 Modelo guardado en: {MODEL_OUTPUT}")
 
-    # Predicciones sobre test set
+    # PREDICCIONES PARA KAGGLE
     print("\n" + "="*60)
-    print(" PREDICCIONES ")
+    print(" PREDICCIONES PARA KAGGLE")
     print("="*60)
-    test_pred = final_model.predict(X_test)
-    test_prob = final_model.predict_proba(X_test)[:, 1]
-
-    # Crear DataFrame de resultados
-    final_predictions = pd.DataFrame({
-        'customer_id': test_customer_ids,
-        'pred_label': test_pred,
-        'pred_prob': test_prob
-    })
-
-    # Guardar archivo final
-    final_predictions.to_csv(TEST_PRED_OUTPUT, index=False)
     
+    # Leer datos de test ORIGINALES para obtener los purchase_id
+    original_test = read_csv("customer_purchases_test")
+    purchase_ids = original_test['purchase_id'].unique()
+    
+    # Hacer predicciones
+    test_pred = final_model.predict(X_test)
+    
+    # Crear DataFrame para Kaggle
+    kaggle_submission = pd.DataFrame({
+        'ID': purchase_ids,
+        'pred': test_pred
+    })
+    
+    print(f"✅ Kaggle submission: {len(kaggle_submission)} registros")
+    
+    # Guardar archivo final para Kaggle
+    kaggle_submission.to_csv(TEST_PRED_OUTPUT, index=False)
 
+    
     # Resumen final
-    print(f"     Resumen final:")
+    print(f"\n     RESUMEN FINAL:")
     print(f"   - Modelo: Random Forest con undersampling")
     print(f"   - Ratio usado: 1:{undersample_ratio}")
     print(f"   - Características usadas: {X_train_balanced.shape[1]} (sin stop words)")
-    print(f"   - Clientes en test: {len(final_predictions)}")
-    print(f"   - Predicciones positivas (1): {final_predictions['pred_label'].sum()}")
-    print(f"   - Predicciones negativas (0): {len(final_predictions) - final_predictions['pred_label'].sum()}")
+    print(f"   - Registros en submission: {len(kaggle_submission)}")
+    print(f"   - Predicciones positivas (1): {kaggle_submission['pred'].sum()}")
+    print(f"   - Predicciones negativas (0): {len(kaggle_submission) - kaggle_submission['pred'].sum()}")
     print(f"   - ROC-AUC CV: {cv_scores_final.mean():.4f}")
+    
 
 if __name__ == "__main__":
     main()

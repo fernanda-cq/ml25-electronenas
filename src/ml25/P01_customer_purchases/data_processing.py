@@ -120,7 +120,7 @@ def build_processor(
                                         'stand', 'step', 'style'],
                                 max_features=30,
                                 lowercase=True
-                            ),  # ← ¡AGREGAR STOP WORDS AQUÍ!
+                            ), 
                             col,
                         )
                     )
