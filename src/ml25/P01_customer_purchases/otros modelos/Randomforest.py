@@ -14,7 +14,7 @@ import numpy as np
 # -----------------------------
 DATA_COLLECTED_AT = datetime(2025, 9, 21).date()
 CURRENT_FILE = Path(__file__).resolve()
-DATA_DIR = CURRENT_FILE / "../../datasets/customer_purchases/"
+DATA_DIR = Path("C:/Users/tania/OneDrive/Documents/ML/ml25-electronenas/src/ml25/datasets/customer_purchases")
 
 MODEL_OUTPUT = DATA_DIR / "random_forest_customer_purchases.pkl"
 TEST_PRED_OUTPUT = DATA_DIR / "test_predictions.csv"

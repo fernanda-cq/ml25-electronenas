@@ -1,8 +1,17 @@
+import sys
+from pathlib import Path
+
+# Agregar el directorio actual al path para importar data_processing.py
+sys.path.append(str(Path(__file__).resolve().parent))
+
 import pandas as pd
 import joblib
-from pathlib import Path
-import numpy as np
+from data_processing import read_test_data
 
+
+# -----------------------------
+# Paths
+# -----------------------------
 CURRENT_FILE = Path(__file__).resolve()
 DATA_DIR = CURRENT_FILE / "../../datasets/customer_purchases/"
 
@@ -13,24 +22,29 @@ OUTPUT_PATH = DATA_DIR / "producto_personalizado_predictions.csv"
 def load_model():
     """Cargar modelo entrenado"""
     model = joblib.load(MODEL_PATH)
-    print(f"Modelo cargado: {type(model).__name__}")
+    print(f"✅ Modelo cargado: {type(model).__name__}")
     return model
 
 def get_feature_order_from_model(model):
+    """Obtener orden de features del modelo"""
     if hasattr(model, 'feature_names_in_'):
         return model.feature_names_in_.tolist()
     else:
         return model.estimators_[0].feature_names_in_.tolist()
 
 def define_your_product():
-    print("\nDEFINE TU PRODUCTO PERSONALIZADO")
-    print("-" * 60)
+    """
+    TÚ defines las características exactas del producto
+    """
+    print("🎯 DEFINE TU PRODUCTO PERSONALIZADO")
+    print("=" * 50)
     
-    # PRODUCTO BASE
+    # PRODUCTO BASE - MODIFICA ESTOS VALORES
     product_features = {
-        # PRECIO
+        # PRECIO (cambia este valor)
         'item_price': 500.00,
-        # CATEGORÍA
+        
+        # CATEGORÍA (cambia la categoría principal a 1, otras a 0)
         'item_category_skirt': 0,      # Falda
         'item_category_dress': 0,      # Vestido
         'item_category_blouse': 0,     # Blusa
@@ -41,7 +55,8 @@ def define_your_product():
         'item_category_slacks': 0,     # Pantalones formales
         'item_category_suit': 0,       # Traje
         'item_category_t-shirt': 0,    # Camiseta
-        # COLOR (elige uno)
+        
+        # IMAGEN (elige una)
         'item_img_filename_imgr.jpg': 0,    # roja
         'item_img_filename_imgw.jpg': 0,    # blanca
         'item_img_filename_imgo.jpg': 0,    # naranja
@@ -50,7 +65,8 @@ def define_your_product():
         'item_img_filename_imgg.jpg': 0,    # verde
         'item_img_filename_imgbl.jpg': 0,   # negra
         'item_img_filename_imgy.jpg': 0,    # amarilla
-        # PALABRAS CLAVE 
+        
+        # PALABRAS CLAVE (activa las que quieras)
         'item_title_bow_elegant': 0,    # Elegante
         'item_title_bow_modern': 1,     # Moderno
         'item_title_bow_classic': 1,    # Clásico
@@ -66,31 +82,32 @@ def define_your_product():
         'item_title_bow_collection': 0, # Colección
         'item_title_bow_lightweight': 0,# Ligero
         'item_title_bow_durable': 1,    # Duradero
-        'item_title_bow_stylish': 1,    # Estiloso  
+        'item_title_bow_stylish': 1,    # Estiloso
+        
     }
     
     # MOSTRAR RESUMEN DEL PRODUCTO
-    print("\n TU PRODUCTO DEFINIDO:")
-    print(f"    Precio: ${product_features['item_price']}")
+    print("\n📦 TU PRODUCTO DEFINIDO:")
+    print(f"   💰 Precio: ${product_features['item_price']}")
     
     # Mostrar categoría activa
     categories = [k for k, v in product_features.items() if k.startswith('item_category_') and v == 1]
     if categories:
         category_name = categories[0].replace('item_category_', '').upper()
-        print(f"    Categoría: {category_name}")
+        print(f"   📂 Categoría: {category_name}")
     
     # Mostrar imagen activa
     images = [k for k, v in product_features.items() if k.startswith('item_img_filename_') and v == 1]
     if images:
         image_name = images[0].replace('item_img_filename_', '').upper()
-        print(f"     Color: {image_name}")
+        print(f"   🖼️  Imagen: {image_name}")
     
     # Mostrar palabras clave activas
     active_words = [k.replace('item_title_bow_', '') for k, v in product_features.items() 
                    if k.startswith('item_title_bow_') and v == 1]
-    print(f"    Palabras clave: {', '.join(active_words)}")
-    print("\n")
-    print("-" * 60)
+    print(f"   🔤 Palabras clave: {', '.join(active_words)}")
+    
+    print("=" * 50)
     
     return product_features
 
@@ -98,7 +115,7 @@ def predict_for_custom_product():
     """
     Predecir para el producto que TÚ defines
     """
-    print(" PREDICCIÓN PARA PRODUCTO PERSONALIZADO")
+    print("🎯 PREDICCIÓN PARA PRODUCTO PERSONALIZADO")
     
     # 1. Cargar modelo
     model = load_model()
@@ -111,8 +128,8 @@ def predict_for_custom_product():
     
     # 4. Cargar clientes reales
     train_df = pd.read_csv(TRAIN_DATA_PATH)
-    unique_customers = train_df[['customer_id']].drop_duplicates().sort_values('customer_id').head(300)
-    print(f"✅ Analizando {len(unique_customers)} clientes reales (REPRODUCIBLE)")
+    unique_customers = train_df[['customer_id']].drop_duplicates().head(300)  # Muestra de 300 clientes
+    print(f"✅ Analizando {len(unique_customers)} clientes reales")
     
     # 5. Para cada cliente: sus features + tu producto
     features_list = []
@@ -120,14 +137,16 @@ def predict_for_custom_product():
     
     for _, customer_row in unique_customers.iterrows():
         customer_id = customer_row['customer_id']
+        
+        # Encontrar cliente en datos reales
         customer_data = train_df[train_df['customer_id'] == customer_id]
         if len(customer_data) == 0:
             continue
             
-        customer_sample = customer_data.iloc[0]
+        customer_sample = customer_data.sample(1).iloc[0]
         
         # Crear features combinadas
-        features = {col: 0 for col in feature_order}
+        features = {col: 0 for col in feature_order}  # Inicializar en 0
         
         # A. Features de TU PRODUCTO (fijas)
         for feature, value in product_features.items():
@@ -162,7 +181,7 @@ def predict_for_custom_product():
     # 6. Crear DataFrame y predecir
     X_new = pd.DataFrame(features_list, columns=feature_order)
     
-    print(f" Features preparadas: {X_new.shape}")
+    print(f"✅ Features preparadas: {X_new.shape}")
     
     predictions = model.predict(X_new)
     probabilities = model.predict_proba(X_new)[:, 1]
@@ -181,9 +200,10 @@ def predict_for_custom_product():
     results = results.sort_values('probability', ascending=False)
     results.to_csv(OUTPUT_PATH, index=False)
     
+    print(f"💾 Resultados guardados: {OUTPUT_PATH}")
+    
     # 8. ANÁLISIS
-    print("-" * 60)
-    print(f"\n RESULTADOS PARA TU PRODUCTO:")
+    print(f"\n📊 RESULTADOS PARA TU PRODUCTO:")
     total = len(results)
     high_interest = len(results[results['probability'] > 0.7])
     medium_interest = len(results[(results['probability'] > 0.4) & (results['probability'] <= 0.7)])
@@ -197,32 +217,26 @@ def predict_for_custom_product():
     # Clientes que PREFIEREN esta categoría
     category_lovers = results[results['prefers_this_category'] == 1]
     if len(category_lovers) > 0:
-        print(f"\n  Clientes que PREFIEREN esta categoría:")
+        print(f"\n🔍 Clientes que PREFIEREN esta categoría:")
         print(f"   - Cantidad: {len(category_lovers)}")
         print(f"   - Probabilidad promedio: {category_lovers['probability'].mean():.3f}")
         print(f"   - Alto interés: {len(category_lovers[category_lovers['probability'] > 0.7])}")
     
     # Top clientes
-    print("\n")
-    print("-" * 60)
-    print(f"\n TOP 10 CLIENTES MÁS PROPENSOS:")
+    print(f"\n🏆 TOP 10 CLIENTES MÁS PROPENSOS:")
     top_10 = results.head(10)
     for idx, row in top_10.iterrows():
         category_icon = ":)" if row['prefers_this_category'] == 1 else "○"
-        print(f"  {row['customer_id']} - {row['probability']*100:.3f}%")
+        print(f"   {idx+1:2d}. {category_icon} {row['customer_id']} (edad {row['age']}) - {row['probability']:.3f}")
+    
     return results, product_features
 
 if __name__ == "__main__":
     try:
         results, product_config = predict_for_custom_product()
-        print("\n")
-        print("-" * 60)
-        print(f"\n ¡ANÁLISIS COMPLETADO!")
+        print(f"\n🎉 ¡ANÁLISIS COMPLETADO!")
         good_prospects = len(results[results['probability'] > 0.5])
-        print(f" Tienes {good_prospects} clientes potenciales para tu producto")
-        print(f" Modifica 'define_your_product()' para probar diferentes productos")
-        print("\n")
-        print("-" * 60)
-        
+        print(f"📈 Tienes {good_prospects} clientes potenciales para tu producto")
+        print(f"💡 Modifica 'define_your_product()' para probar diferentes productos")
     except Exception as e:
-        print(f" Error: {e}")
+        print(f"❌ Error: {e}")
