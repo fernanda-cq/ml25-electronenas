@@ -240,14 +240,14 @@ def main():
     # -----------------------------
     print("\n🏗️ CONFIGURANDO MODELO CON DATOS BALANCEADOS...")
     
+    # 🛡️ MODELO MÁS RESTRICTIVO PARA REDUCIR OVERFITTING
     rf = RandomForestClassifier(
-        random_state=42, 
-        # class_weight=None,  # Ya no necesitamos porque los datos están balanceados
-        max_depth=20,
-        min_samples_split=10,
-        min_samples_leaf=4,
-        max_features='sqrt',
-        n_estimators=200
+        random_state=42,
+        max_depth=8,            # ⬇️ Más bajo
+        min_samples_split=20,   # ⬆️ Más alto  
+        min_samples_leaf=8,     # ⬆️ Más alto
+        n_estimators=100,
+        max_features='sqrt'
     )
     
     param_dist = {

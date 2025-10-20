@@ -112,12 +112,18 @@ def build_processor(
         free_text_transformers = []
         for col in free_text_features:
             free_text_transformers.append(
-                (
-                    col,
-                    CountVectorizer(),  # como quieren procesar esta columna?
-                    col,
-                )
-            )
+                        (
+                            col,
+                            CountVectorizer(
+                                stop_words=['the', 'you', 'your', 'that', 'for', 'with', 'have', 
+                                        'must', 'need', 'every', 'out', 'up', 'occasion', 
+                                        'stand', 'step', 'style'],
+                                max_features=30,
+                                lowercase=True
+                            ),  # ← ¡AGREGAR STOP WORDS AQUÍ!
+                            col,
+                        )
+                    )
         preprocessor = ColumnTransformer(
             transformers=[
                 ("num", numeric_transformer, numerical_features),
