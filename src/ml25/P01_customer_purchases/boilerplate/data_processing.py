@@ -73,7 +73,7 @@ def read_train_data():
 
 def read_test_data():
     test_df = read_csv("customer_purchases_test")
-    customer_feat = read_csv("customer_feat.csv")
+    customer_feat = read_csv("customer_features.csv")
 
     # Cambiar por sus datos procesados
     # Prueba no tiene etiquetas
