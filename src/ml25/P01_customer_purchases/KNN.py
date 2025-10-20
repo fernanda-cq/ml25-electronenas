@@ -7,7 +7,7 @@ from pathlib import Path
 
 def main():
     # 1. Leer el archivo preprocesado
-    file_path = Path("C:/Users/tania/OneDrive/Documents/ML/ml25-electronenas/src/ml25/datasets/customer_purchases/customer_purchases_train_final_preprocessed.csv")
+    file_path = Path("C:/Users/Abiga/OneDrive/Documents/Aprendizaje de maquina/ml25-electronenas/src/ml25/datasets/customer_purchases/customer_purchases_train_final_preprocessed.csv")
     df = pd.read_csv(file_path)
     print(f"✅ Archivo cargado: {file_path}")
     print(f"Forma del dataset: {df.shape}")
