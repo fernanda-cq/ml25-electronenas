@@ -1,13 +1,8 @@
 import sys
 from pathlib import Path
-
-# Agregar el directorio actual al path para importar data_processing.py
-sys.path.append(str(Path(__file__).resolve().parent))
-
 import pandas as pd
 import joblib
-from data_processing import read_test_data
-
+import numpy as np
 
 # -----------------------------
 # Paths
@@ -83,7 +78,6 @@ def define_your_product():
         'item_title_bow_lightweight': 0,# Ligero
         'item_title_bow_durable': 1,    # Duradero
         'item_title_bow_stylish': 1,    # Estiloso
-        
     }
     
     # MOSTRAR RESUMEN DEL PRODUCTO
@@ -113,7 +107,7 @@ def define_your_product():
 
 def predict_for_custom_product():
     """
-    Predecir para el producto que TÚ defines
+    Predecir para el producto que TÚ defines - VERSIÓN CORREGIDA
     """
     print("🎯 PREDICCIÓN PARA PRODUCTO PERSONALIZADO")
     
@@ -126,24 +120,54 @@ def predict_for_custom_product():
     # 3. TÚ defines el producto
     product_features = define_your_product()
     
-    # 4. Cargar clientes reales
-    train_df = pd.read_csv(TRAIN_DATA_PATH)
-    unique_customers = train_df[['customer_id']].drop_duplicates().head(300)  # Muestra de 300 clientes
-    print(f"✅ Analizando {len(unique_customers)} clientes reales")
+    # 4. Cargar clientes reales - VERSIÓN CORREGIDA
+    try:
+        train_df = pd.read_csv(TRAIN_DATA_PATH)
+        print(f"✅ Datos cargados: {train_df.shape}")
+        
+        # ✅ VERIFICAR QUÉ COLUMNAS EXISTEN
+        print(f"🔍 Columnas disponibles: {train_df.columns.tolist()}")
+        
+        # Buscar la columna de ID correcta
+        if 'purchase_id' in train_df.columns:
+            id_column = 'purchase_id'
+            print("✅ Usando 'purchase_id' como identificador")
+        elif 'ID' in train_df.columns:
+            id_column = 'ID'
+            print("✅ Usando 'ID' como identificador") 
+        elif 'customer_id' in train_df.columns:
+            id_column = 'customer_id'
+            print("✅ Usando 'customer_id' como identificador")
+        else:
+            # Usar la primera columna que no sea numérica
+            non_numeric_cols = train_df.select_dtypes(exclude=[np.number]).columns
+            if len(non_numeric_cols) > 0:
+                id_column = non_numeric_cols[0]
+                print(f"✅ Usando '{id_column}' como identificador")
+            else:
+                id_column = train_df.columns[0]
+                print(f"⚠️  Usando primera columna '{id_column}' como identificador")
+        
+        unique_customers = train_df[[id_column]].drop_duplicates().head(300)
+        print(f"✅ Analizando {len(unique_customers)} clientes reales")
+        
+    except Exception as e:
+        print(f"❌ Error cargando datos: {e}")
+        return None, None
     
     # 5. Para cada cliente: sus features + tu producto
     features_list = []
     customer_info = []
     
     for _, customer_row in unique_customers.iterrows():
-        customer_id = customer_row['customer_id']
+        customer_id = customer_row[id_column]
         
         # Encontrar cliente en datos reales
-        customer_data = train_df[train_df['customer_id'] == customer_id]
+        customer_data = train_df[train_df[id_column] == customer_id]
         if len(customer_data) == 0:
             continue
             
-        customer_sample = customer_data.sample(1).iloc[0]
+        customer_sample = customer_data.iloc[0]  # Usar primer registro, no aleatorio
         
         # Crear features combinadas
         features = {col: 0 for col in feature_order}  # Inicializar en 0
@@ -226,7 +250,7 @@ def predict_for_custom_product():
     print(f"\n🏆 TOP 10 CLIENTES MÁS PROPENSOS:")
     top_10 = results.head(10)
     for idx, row in top_10.iterrows():
-        category_icon = ":)" if row['prefers_this_category'] == 1 else "○"
+        category_icon = "✓" if row['prefers_this_category'] == 1 else "○"
         print(f"   {idx+1:2d}. {category_icon} {row['customer_id']} (edad {row['age']}) - {row['probability']:.3f}")
     
     return results, product_features
@@ -234,9 +258,12 @@ def predict_for_custom_product():
 if __name__ == "__main__":
     try:
         results, product_config = predict_for_custom_product()
-        print(f"\n🎉 ¡ANÁLISIS COMPLETADO!")
-        good_prospects = len(results[results['probability'] > 0.5])
-        print(f"📈 Tienes {good_prospects} clientes potenciales para tu producto")
-        print(f"💡 Modifica 'define_your_product()' para probar diferentes productos")
+        if results is not None:
+            print(f"\n🎉 ¡ANÁLISIS COMPLETADO!")
+            good_prospects = len(results[results['probability'] > 0.5])
+            print(f"📈 Tienes {good_prospects} clientes potenciales para tu producto")
+            print(f"💡 Modifica 'define_your_product()' para probar diferentes productos")
+        else:
+            print("❌ No se pudieron obtener resultados")
     except Exception as e:
         print(f"❌ Error: {e}")

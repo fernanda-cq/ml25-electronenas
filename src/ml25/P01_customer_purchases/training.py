@@ -355,8 +355,6 @@ def main():
         'pred': test_pred
     })
     
-    print(f"✅ Kaggle submission: {len(kaggle_submission)} registros")
-    
     # Guardar archivo final para Kaggle
     kaggle_submission.to_csv(TEST_PRED_OUTPUT, index=False)
 
