@@ -250,8 +250,8 @@ def predict_for_custom_product():
     print(f"\n🏆 TOP 10 CLIENTES MÁS PROPENSOS:")
     top_10 = results.head(10)
     for idx, row in top_10.iterrows():
-        category_icon = "✓" if row['prefers_this_category'] == 1 else "○"
-        print(f"   {idx+1:2d}. {category_icon} {row['customer_id']} (edad {row['age']}) - {row['probability']:.3f}")
+        category_icon = "Prefiere esta categoria: CUST_" if row['prefers_this_category'] == 1 else "No prefieren esta categoria: CUST_"
+        print(f"{category_icon}{row['customer_id']} - {row['probability']*100:.3f}%")
     
     return results, product_features
 

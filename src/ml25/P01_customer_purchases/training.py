@@ -320,7 +320,7 @@ def main():
     
     print("   Top 10 características más importantes:")
     for i, row in feature_importance.head(10).iterrows():
-        print(f"      {row['feature']}: {row['importance']:.4f}")
+        print(f"      {row['feature']}: {row['importance']*100:.3f}%")
 
     # Validación cruzada final en datos balanceados
     print("\n" + "="*60)
