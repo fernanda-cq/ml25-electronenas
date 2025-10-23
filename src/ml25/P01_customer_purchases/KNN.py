@@ -1,10 +1,18 @@
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
+<<<<<<< HEAD
+=======
+from sklearn.impute import SimpleImputer
+>>>>>>> master
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
 
 def main():
     # 1. Leer el archivo preprocesado
+<<<<<<< HEAD
     df = pd.read_csv("c:/ml25-electronenas/src/ml25/datasets/customer_purchases/customer_purchases_train_preprocessed.csv")
+=======
+    df = pd.read_csv("C:/Users/tania/OneDrive/Documents/ML/ml25-electronenas/src/ml25/datasets/customer_purchases/customer_purchases_train_preprocessed.csv")
+>>>>>>> master
 
     # 2. Verificar que la columna objetivo exista
     target_column = 'label'
@@ -22,6 +30,7 @@ def main():
     X = df.drop(columns=[target_column])
     y = df[target_column]
 
+<<<<<<< HEAD
     # 5. Entrenar el modelo
     modelo = KNeighborsClassifier(n_neighbors=5)
     modelo.fit(X, y)
@@ -31,11 +40,27 @@ def main():
 
     # 7. Evaluación
     print("Metricas de evaluacion:")
+=======
+    # 5. Imputar valores faltantes con la media
+    imputer = SimpleImputer(strategy="mean")
+    X_imputado = imputer.fit_transform(X)
+
+    # 6. Entrenar el modelo KNN
+    modelo = KNeighborsClassifier(n_neighbors=5)
+    modelo.fit(X_imputado, y)
+
+    # 7. Predicciones
+    predicciones = modelo.predict(X_imputado)
+
+    # 8. Evaluación
+    print("Métricas de evaluación:")
+>>>>>>> master
     print("Accuracy:", accuracy_score(y, predicciones))
     print("Precision:", precision_score(y, predicciones, zero_division=0))
     print("Recall:", recall_score(y, predicciones, zero_division=0))
     print("F1 Score:", f1_score(y, predicciones, zero_division=0))
 
+<<<<<<< HEAD
     print("Matriz de confusion:")
     print(confusion_matrix(y, predicciones, labels=[0, 1]))
 
@@ -44,3 +69,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+=======
+    print("\nMatriz de confusión:")
+    print(confusion_matrix(y, predicciones, labels=[0, 1]))
+
+    print("\nReporte de clasificación:")
+    print(classification_report(y, predicciones, labels=[0, 1], zero_division=0))
+
+if __name__ == "__main__":
+    main()
+>>>>>>> master

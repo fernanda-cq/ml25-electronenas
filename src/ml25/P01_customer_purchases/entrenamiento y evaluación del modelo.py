@@ -9,7 +9,11 @@ DATA_COLLECTED_AT = datetime(2025, 9, 21).date()
 
 
 CURRENT_FILE = Path(__file__).resolve()
+<<<<<<< HEAD
 DATA_DIR = CURRENT_FILE.parent.parent / "datasets" / "Procesamiento_de_datos"
+=======
+DATA_DIR = CURRENT_FILE.parent.parent / "datasets" / "customer_purchases"
+>>>>>>> master
 
 
 def read_csv(filename: str) -> pd.DataFrame:
@@ -19,8 +23,13 @@ def read_csv(filename: str) -> pd.DataFrame:
 
 def main():
     # Datos
+<<<<<<< HEAD
     train_df = read_csv("Procesamiento_de_datos")
     test_df = read_csv("Procesamiento_de_datos")
+=======
+    train_df = read_csv("customer_purchases_train")
+    test_df = read_csv("customer_purchases_test")
+>>>>>>> master
 
     print("Información del conjunto de entrenamiento:")
     print(train_df.info())
