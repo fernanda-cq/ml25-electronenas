@@ -61,10 +61,10 @@ def save_model(model):
         # Crear directorio si no existe
         MODEL_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(model, MODEL_OUTPUT)
-        print(f"✅ Modelo guardado en {MODEL_OUTPUT}")
+        print(f"Modelo guardado en {MODEL_OUTPUT}")
         return True
     except Exception as e:
-        print(f"❌ Error guardando modelo: {e}")
+        print(f"Error guardando modelo: {e}")
         return False
 
 def load_model():
@@ -76,10 +76,10 @@ def load_model():
             raise FileNotFoundError(f"Modelo no encontrado en {MODEL_OUTPUT}")
         
         model = joblib.load(MODEL_OUTPUT)
-        print(f"✅ Modelo cargado desde {MODEL_OUTPUT}")
+        print(f"Modelo cargado desde {MODEL_OUTPUT}")
         return model
     except Exception as e:
-        print(f"❌ Error cargando modelo: {e}")
+        print(f"Error cargando modelo: {e}")
         return None
 
 def get_model_info():

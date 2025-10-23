@@ -120,7 +120,7 @@ def build_processor(
                                         'stand', 'step', 'style'],
                                 max_features=30,
                                 lowercase=True
-                            ),  # ← ¡AGREGAR STOP WORDS AQUÍ!
+                            ), 
                             col,
                         )
                     )
@@ -319,12 +319,12 @@ if __name__ == "__main__":
     # Guardar dataset preprocesado
     output_path = DATA_DIR / "customer_purchases_train_final_preprocessed.csv"
     df_train_processed.to_csv(output_path, index=False)
-    print(f"\n✅ Dataset final preprocesado guardado en: {output_path}")
+    print(f"\nDataset final preprocesado guardado en: {output_path}")
 
     X_test = read_test_data()  # read_test_data ya maneja customer_features y preprocess
     output_test_path = DATA_DIR / "customer_purchases_test_final_preprocessed.csv"
     X_test.to_csv(output_test_path, index=False)
-    print(f"\n✅ Dataset de prueba preprocesado guardado en: {output_test_path}")
+    print(f"\nDataset de prueba preprocesado guardado en: {output_test_path}")
     # -------------------------
     # Procesar datos de prueba (opcional)
     # -------------------------
