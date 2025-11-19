@@ -222,6 +222,7 @@ __marimo__/
 **/data_batch_*
 *.tar.gz
 **/datasets
+!src/ml25/ejemplo_wandb/datasets
 uv.lock
 wandb/
 *desktop.ini
